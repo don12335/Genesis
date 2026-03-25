@@ -1,5 +1,5 @@
 # Project Genesis
-GENESIS.png
+![genesis](https://user-images.githubusercontent.com/1991296/230134379-7181e485-c521-4d23-a0d6-f7b3b61ba524.png)
 > ### [CRITICAL] View the Project Genesis Final Report Here: [REPORT.md](./REPORT.md)
 > **"Don't just write code. Evolve it."**
 
