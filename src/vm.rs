@@ -23,9 +23,6 @@ pub enum Opcode {
     Hlt,
 }
 
-// AstVM serves as the primary execution engine
-
-// True AST execution engine
 pub struct AstVM {
     pub program: Vec<Opcode>,
     pub memory: [u8; MEMORY_SIZE],
@@ -120,7 +117,7 @@ impl AstVM {
                 if next_ip >= 0 && next_ip < self.program.len() as i32 {
                     self.ip = next_ip as usize;
                 } else {
-                    self.halted = true; // Out of bounds jump halts
+                    self.halted = true;
                 }
             }
             Opcode::Jz(r, offset) => {
@@ -166,13 +163,11 @@ impl AstVM {
         let mut rng = rand::rng();
         while !self.halted {
             if rng.random_bool(intensity) {
-                // Radiation event! Flip a random bit in a random register
                 let target_reg = rng.random_range(0..NUM_REGISTERS);
                 let target_bit = rng.random_range(0..32);
                 self.registers[target_reg] ^= 1 << target_bit;
             }
             if rng.random_bool(intensity * 0.1) {
-                // Occasional memory bit flip
                 let target_addr = rng.random_range(0..MEMORY_SIZE);
                 let target_bit = rng.random_range(0..8);
                 self.memory[target_addr] ^= 1 << target_bit;

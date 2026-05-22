@@ -72,7 +72,6 @@ impl EvolutionaryEngine {
         let mut vm = AstVM::new();
         
         if mode == "logic" {
-            // XOR Gate Evaluation
             let table = [
                 (0, 0, 0),
                 (0, 1, 1),
@@ -96,7 +95,6 @@ impl EvolutionaryEngine {
             }
             return score;
         } else if mode == "math" {
-            // Doubling: f(x) = x * 2
             let tests = [2, 5, 10];
             let mut score = 0.0;
             for x in tests.iter() {
@@ -113,20 +111,18 @@ impl EvolutionaryEngine {
             }
             return score;
         } else if mode == "fault_tolerance" {
-            // Aerospace Fault-Tolerance: f(x) = x * 2 but under heavy bit-flip radiation
             let tests = [2, 5, 10];
             let mut score = 0.0;
             for x in tests.iter() {
-                // Run 5 separate trials per test case
                 for _trial in 0..5 {
                     vm.load(sequence);
                     vm.registers[0] = *x;
-                    vm.run_with_radiation(0.02); // 2% chance per cycle to bit-flip a register
+                    vm.run_with_radiation(0.02);
                     
                     let result = vm.registers[0];
                     let expected = x * 2;
                     if result == expected {
-                        score += 20.0; // 100 max per test case
+                        score += 20.0;
                     } else {
                         score -= (result as f64 - expected as f64).abs() * 1.0;
                     }

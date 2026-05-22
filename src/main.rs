@@ -103,10 +103,7 @@ fn main() {
             rust_code.push_str("    let mut r: [i32; 8] = [0; 8];\n");
             rust_code.push_str("    let mut m: [u8; 1024] = [0; 1024];\n\n");
 
-            // Extremely basic linear translation for demonstration
-            // (Note: Jumps are complex to translate statically without a loop/match block, 
-            // so we will emulate the VM loop natively for 100% accuracy)
-            
+
             rust_code.push_str("    let mut ip: i32 = 0;\n");
             rust_code.push_str("    let mut cycles = 0;\n");
             rust_code.push_str("    loop {\n");

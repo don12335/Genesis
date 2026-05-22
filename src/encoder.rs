@@ -31,7 +31,7 @@ pub fn decode(hex_str: &str) -> Vec<Opcode> {
     
     for i in (0..chars.len()).step_by(4) {
         if i + 3 >= chars.len() {
-            break; // Truncated
+            break;
         }
         let b1_str: String = chars[i..i+2].iter().collect();
         let b2_str: String = chars[i+2..i+4].iter().collect();
@@ -48,7 +48,7 @@ pub fn decode(hex_str: &str) -> Vec<Opcode> {
             0x05 => Opcode::Mul(byte2 >> 4, byte2 & 0x0F),
             0x06 => Opcode::Div(byte2 >> 4, byte2 & 0x0F),
             0x07 => Opcode::Mov(byte2 >> 4, byte2 & 0x0F),
-            0x08 => Opcode::Ldi(byte2 >> 4, ((byte2 & 0x0F) as i8) as i32), // Simple signed extension
+            0x08 => Opcode::Ldi(byte2 >> 4, ((byte2 & 0x0F) as i8) as i32),
             0x09 => Opcode::Jmp(byte2 as i8 as i32),
             0x0A => Opcode::Jz(byte2 >> 4, ((byte2 & 0x0F) as i8) as i32),
             0x0B => Opcode::IoOut(byte2),
