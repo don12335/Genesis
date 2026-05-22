@@ -40,4 +40,7 @@ cargo build --release
 ```
 
 ---
-*Maintained by don*
+
+## Contributors & Acknowledgments
+* **don** - Creator & Lead Developer
+* **Google Gemini** - AI Pair Programmer (Assisted in Rust architecture design and evolutionary engine optimization)
