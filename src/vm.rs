@@ -23,6 +23,31 @@ pub enum Opcode {
     Hlt,
 }
 
+pub const OPCODE_COUNT: u8 = 15;
+
+impl Opcode {
+    pub fn random(rng: &mut impl Rng) -> Self {
+        let op_type = rng.random_range(0..OPCODE_COUNT);
+        match op_type {
+            0 => Opcode::Nop,
+            1 => Opcode::Inc(rng.random_range(0..NUM_REGISTERS) as u8),
+            2 => Opcode::Dec(rng.random_range(0..NUM_REGISTERS) as u8),
+            3 => Opcode::Add(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(0..NUM_REGISTERS) as u8),
+            4 => Opcode::Sub(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(0..NUM_REGISTERS) as u8),
+            5 => Opcode::Mul(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(0..NUM_REGISTERS) as u8),
+            6 => Opcode::Div(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(0..NUM_REGISTERS) as u8),
+            7 => Opcode::Mov(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(0..NUM_REGISTERS) as u8),
+            8 => Opcode::Ldi(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(-10..20)),
+            9 => Opcode::Jmp(rng.random_range(-5..5)),
+            10 => Opcode::Jz(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(-5..5)),
+            11 => Opcode::IoOut(rng.random_range(0..NUM_REGISTERS) as u8),
+            12 => Opcode::Ld(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(0..NUM_REGISTERS) as u8),
+            13 => Opcode::St(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(0..NUM_REGISTERS) as u8),
+            _ => Opcode::Hlt,
+        }
+    }
+}
+
 pub struct AstVM {
     pub program: Vec<Opcode>,
     pub memory: [u8; MEMORY_SIZE],
@@ -74,42 +99,42 @@ impl AstVM {
         match instr {
             Opcode::Nop => {}
             Opcode::Inc(r) => {
-                let r = (r as usize) % NUM_REGISTERS;
+                let r = r as usize;
                 self.registers[r] = self.registers[r].wrapping_add(1);
             }
             Opcode::Dec(r) => {
-                let r = (r as usize) % NUM_REGISTERS;
+                let r = r as usize;
                 self.registers[r] = self.registers[r].wrapping_sub(1);
             }
             Opcode::Add(d, s) => {
-                let d = (d as usize) % NUM_REGISTERS;
-                let s = (s as usize) % NUM_REGISTERS;
+                let d = d as usize;
+                let s = s as usize;
                 self.registers[d] = self.registers[d].wrapping_add(self.registers[s]);
             }
             Opcode::Sub(d, s) => {
-                let d = (d as usize) % NUM_REGISTERS;
-                let s = (s as usize) % NUM_REGISTERS;
+                let d = d as usize;
+                let s = s as usize;
                 self.registers[d] = self.registers[d].wrapping_sub(self.registers[s]);
             }
             Opcode::Mul(d, s) => {
-                let d = (d as usize) % NUM_REGISTERS;
-                let s = (s as usize) % NUM_REGISTERS;
+                let d = d as usize;
+                let s = s as usize;
                 self.registers[d] = self.registers[d].wrapping_mul(self.registers[s]);
             }
             Opcode::Div(d, s) => {
-                let d = (d as usize) % NUM_REGISTERS;
-                let s = (s as usize) % NUM_REGISTERS;
+                let d = d as usize;
+                let s = s as usize;
                 if self.registers[s] != 0 {
                     self.registers[d] = self.registers[d].wrapping_div(self.registers[s]);
                 }
             }
             Opcode::Mov(d, s) => {
-                let d = (d as usize) % NUM_REGISTERS;
-                let s = (s as usize) % NUM_REGISTERS;
+                let d = d as usize;
+                let s = s as usize;
                 self.registers[d] = self.registers[s];
             }
             Opcode::Ldi(d, imm) => {
-                let d = (d as usize) % NUM_REGISTERS;
+                let d = d as usize;
                 self.registers[d] = imm;
             }
             Opcode::Jmp(offset) => {
@@ -121,7 +146,7 @@ impl AstVM {
                 }
             }
             Opcode::Jz(r, offset) => {
-                let r = (r as usize) % NUM_REGISTERS;
+                let r = r as usize;
                 if self.registers[r] == 0 {
                     let next_ip = (self.ip as i32).wrapping_add(offset);
                     if next_ip >= 0 && next_ip < self.program.len() as i32 {
@@ -132,20 +157,20 @@ impl AstVM {
                 }
             }
             Opcode::IoOut(r) => {
-                let r = (r as usize) % NUM_REGISTERS;
+                let r = r as usize;
                 if self.output_buffer.len() < 64 {
                     self.output_buffer.push(self.registers[r]);
                 }
             }
             Opcode::Ld(d, a) => {
-                let d = (d as usize) % NUM_REGISTERS;
-                let a = (a as usize) % NUM_REGISTERS;
+                let d = d as usize;
+                let a = a as usize;
                 let addr = (self.registers[a] as usize) % MEMORY_SIZE;
                 self.registers[d] = self.memory[addr] as i32;
             }
             Opcode::St(a, s) => {
-                let a = (a as usize) % NUM_REGISTERS;
-                let s = (s as usize) % NUM_REGISTERS;
+                let a = a as usize;
+                let s = s as usize;
                 let addr = (self.registers[a] as usize) % MEMORY_SIZE;
                 self.memory[addr] = (self.registers[s] & 0xFF) as u8;
             }

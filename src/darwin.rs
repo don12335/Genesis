@@ -1,4 +1,4 @@
-use crate::vm::{AstVM, Opcode, NUM_REGISTERS};
+use crate::vm::{AstVM, Opcode};
 use rand::prelude::*;
 use rayon::prelude::*;
 
@@ -22,32 +22,13 @@ impl Genotype {
     pub fn random(rng: &mut impl Rng) -> Self {
         let mut genotype = Self::new();
         for _ in 0..SEQUENCE_LENGTH {
-            genotype.sequence.push(random_opcode(rng));
+            genotype.sequence.push(Opcode::random(rng));
         }
         genotype
     }
 }
 
-pub fn random_opcode(rng: &mut impl Rng) -> Opcode {
-    let op_type = rng.random_range(0..15);
-    match op_type {
-        0 => Opcode::Nop,
-        1 => Opcode::Inc(rng.random_range(0..NUM_REGISTERS) as u8),
-        2 => Opcode::Dec(rng.random_range(0..NUM_REGISTERS) as u8),
-        3 => Opcode::Add(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(0..NUM_REGISTERS) as u8),
-        4 => Opcode::Sub(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(0..NUM_REGISTERS) as u8),
-        5 => Opcode::Mul(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(0..NUM_REGISTERS) as u8),
-        6 => Opcode::Div(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(0..NUM_REGISTERS) as u8),
-        7 => Opcode::Mov(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(0..NUM_REGISTERS) as u8),
-        8 => Opcode::Ldi(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(-10..20)),
-        9 => Opcode::Jmp(rng.random_range(-5..5)),
-        10 => Opcode::Jz(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(-5..5)),
-        11 => Opcode::IoOut(rng.random_range(0..NUM_REGISTERS) as u8),
-        12 => Opcode::Ld(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(0..NUM_REGISTERS) as u8),
-        13 => Opcode::St(rng.random_range(0..NUM_REGISTERS) as u8, rng.random_range(0..NUM_REGISTERS) as u8),
-        _ => Opcode::Hlt,
-    }
-}
+
 
 pub struct EvolutionaryEngine {
     pub population: Vec<Genotype>,
@@ -204,15 +185,16 @@ impl EvolutionaryEngine {
                     }
                     let p2 = &self.population[best_parent2];
                     
-                    let cross_point = rng.random_range(0..SEQUENCE_LENGTH);
-                    for i in cross_point..SEQUENCE_LENGTH {
-                        p1.sequence[i] = p2.sequence[i];
+                    for i in 0..SEQUENCE_LENGTH {
+                        if rng.random_bool(0.5) {
+                            p1.sequence[i] = p2.sequence[i];
+                        }
                     }
                 }
 
                 for i in 0..SEQUENCE_LENGTH {
                     if rng.random_bool(0.1) {
-                        p1.sequence[i] = random_opcode(&mut rng);
+                        p1.sequence[i] = Opcode::random(&mut rng);
                     }
                 }
 
