@@ -2,7 +2,7 @@ use crate::vm::{AstVM, Opcode, NUM_REGISTERS};
 use rand::prelude::*;
 use rayon::prelude::*;
 
-pub const SEQUENCE_LENGTH: usize = 64;
+pub const SEQUENCE_LENGTH: usize = 128;
 pub const POPULATION_SIZE: usize = 2000;
 
 #[derive(Clone)]
@@ -129,6 +129,26 @@ impl EvolutionaryEngine {
                 }
             }
             return score;
+        } else if mode == "fibonacci" {
+            let target_seq = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55];
+            vm.load(sequence);
+            vm.run(); // It might run until MAX_CYCLES or Hlt
+
+            let mut score = 0.0;
+            let outputs = &vm.output_buffer;
+            
+            for i in 0..target_seq.len() {
+                if i < outputs.len() {
+                    if outputs[i] == target_seq[i] {
+                        score += 100.0;
+                    } else {
+                        score -= (outputs[i] as f64 - target_seq[i] as f64).abs() * 2.0;
+                    }
+                } else {
+                    score -= 50.0; // Penalty for missing output
+                }
+            }
+            return score;
         }
         
         0.0
@@ -147,7 +167,7 @@ impl EvolutionaryEngine {
             let best_fitness = self.population[0].fitness;
             if g % 100 == 0 {
                 println!("Generation {} | Optimal Fitness: {}", g, best_fitness);
-                let target = if mode_ref == "logic" { 400.0 } else { 300.0 };
+                let target = if mode_ref == "logic" { 400.0 } else if mode_ref == "fibonacci" { 1000.0 } else { 300.0 };
                 if best_fitness >= target {
                     println!("Convergence reached at Generation {}.", g);
                     break;

@@ -78,6 +78,14 @@ fn main() {
                         println!("  Radiation Trial {} -> f({}) = {} [{}]", trial, x, vm.registers[0], success);
                     }
                 }
+            } else if target == "fibonacci" {
+                vm.load(&best.sequence);
+                vm.run();
+                println!("Fibonacci Output Sequence:");
+                for val in vm.output_buffer.iter() {
+                    print!("{} ", val);
+                }
+                println!("\nCycles: {}", vm.cycles);
             }
 
             // Export to file
