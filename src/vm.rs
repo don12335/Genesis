@@ -42,7 +42,7 @@ impl AstVM {
             ip: 0,
             halted: false,
             cycles: 0,
-            output_buffer: Vec::new(),
+            output_buffer: Vec::with_capacity(64),
         }
     }
 
@@ -133,7 +133,9 @@ impl AstVM {
             }
             Opcode::IoOut(r) => {
                 let r = (r as usize) % NUM_REGISTERS;
-                self.output_buffer.push(self.registers[r]);
+                if self.output_buffer.len() < 64 {
+                    self.output_buffer.push(self.registers[r]);
+                }
             }
             Opcode::Ld(d, a) => {
                 let d = (d as usize) % NUM_REGISTERS;
