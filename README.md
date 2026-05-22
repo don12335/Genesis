@@ -24,7 +24,13 @@ Designed for mission-critical applications, the engine can simulate severe hardw
 cargo run --release -- evolve --target fault_tolerance
 ```
 
-### 4. Native Rust Transpiler
+### 4. Turing-Complete Evolution (Fibonacci Sequence)
+The engine is capable of evolving algorithms that require true Turing-completeness, including memory initialization, variable swapping, and infinite loops (`Jmp`). The `fibonacci` target forces the AI to synthesize a program that continually calculates and outputs the Fibonacci sequence (`1, 1, 2, 3, 5, 8, 13...`).
+```bash
+cargo run --release -- evolve --target fibonacci --generations 500000
+```
+
+### 5. Native Rust Transpiler
 The engine features a built-in transpiler that converts the evolved AST bytecode (Hex format) directly into standard Rust source code. This allows the synthesized logic to be compiled and executed natively without virtual machine overhead.
 ```bash
 cargo run --release -- transpile --input program.hex --output output.rs
