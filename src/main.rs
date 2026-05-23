@@ -5,6 +5,8 @@ mod encoder;
 use clap::{Parser, Subcommand};
 use darwin::EvolutionaryEngine;
 use std::fs;
+use serde_json::json;
+use rand::prelude::*;
 
 #[derive(Parser)]
 #[command(name = "Genesis")]
@@ -96,6 +98,16 @@ fn main() {
                 Ok(_) => println!("Successfully exported sequence to 'program.hex'"),
                 Err(e) => eprintln!("Failed to export sequence: {}", e),
             }
+
+            // Export program.json for Visualizer (Lightweight)
+            let program_data = json!({
+                "target": target,
+                "program": best.sequence
+            });
+
+            let _ = fs::create_dir_all("visualizer");
+            let _ = fs::write("visualizer/program.json", serde_json::to_string_pretty(&program_data).unwrap());
+            println!("Successfully exported visualizer/program.json");
         }
         Commands::Transpile { input, output } => {
             println!("Transpiling sequence from {}...", input);

@@ -1,10 +1,11 @@
 use rand::prelude::*;
+use serde::Serialize;
 
 pub const MEMORY_SIZE: usize = 1024;
 pub const MAX_CYCLES: usize = 10_000;
 pub const NUM_REGISTERS: usize = 8;
 
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq, Serialize)]
 pub enum Opcode {
     Nop,
     Inc(u8),        // Reg
