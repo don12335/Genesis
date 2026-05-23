@@ -606,7 +606,7 @@ fn main() {
                 #[cfg(target_os = "windows")]
                 {
                     if std::process::Command::new("cmd")
-                        .args(&["/C", "start", "visualizer/index.html"])
+                        .args(&["/C", "start", "", "visualizer\\index.html"])
                         .spawn()
                         .is_ok()
                     {
