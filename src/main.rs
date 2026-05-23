@@ -550,7 +550,19 @@ fn train_brain(generations: usize) {
     println!("The trained brain is now ready to be loaded in the web browser.");
 }
 
+fn extract_visualizer() {
+    let _ = std::fs::create_dir_all("visualizer");
+    let html = include_str!("../visualizer/index.html");
+    let css = include_str!("../visualizer/style.css");
+    let js = include_str!("../visualizer/app.js");
+
+    let _ = std::fs::write("visualizer/index.html", html);
+    let _ = std::fs::write("visualizer/style.css", css);
+    let _ = std::fs::write("visualizer/app.js", js);
+}
+
 fn main() {
+    extract_visualizer();
     loop {
         println!("\n=========================================");
         println!("      GENESIS NEUROEVOLUTION TRAINER      ");
