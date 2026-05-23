@@ -563,16 +563,18 @@ fn extract_visualizer() {
 
 fn update_if_available() {
     println!("Checking for updates from GitHub...");
-    let status = self_update::backends::github::Update::configure()
+    let status = match self_update::backends::github::Update::configure()
         .repo_owner("don12335")
         .repo_name("Genesis")
         .bin_name("genesis")
-        .target("windows") // Expects asset name: genesis-windows.exe
-        .no_archive(true)  // Expects a bare .exe instead of a .zip
+        .target("windows")
         .show_download_progress(true)
         .current_version(env!("CARGO_PKG_VERSION"))
         .build()
-        .and_then(|updater| updater.update());
+    {
+        Ok(updater) => updater.update(),
+        Err(e) => Err(e),
+    };
 
     match status {
         Ok(self_update::Status::UpToDate(v)) => {
