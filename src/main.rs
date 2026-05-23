@@ -13,7 +13,7 @@ const H: f64 = 500.0;
 
 const POPULATION_SIZE: usize = 100;
 const TRIAL_FRAMES: usize = 800;
-const DNA_LENGTH: usize = 62;
+const DNA_LENGTH: usize = 50;
 const MUTATION_RATE: f64 = 0.05;
 
 #[derive(Clone, Debug)]
@@ -318,7 +318,7 @@ impl Brain {
         let mut dna_idx = 0;
         for _ in 0..6 {
             let mut sum = 0.0;
-            for i in 0..7 {
+            for i in 0..5 {
                 sum += inputs[i] * self.dna[dna_idx];
                 dna_idx += 1;
             }
@@ -371,12 +371,9 @@ fn evaluate_agent(dna: &[f64], checkpoints: &[Point], walls: &[Wall]) -> f64 {
         }
 
         let target = checkpoints[checkpoint_idx];
-        let dx = (target.x - pos_x) / 800.0;
-        let dy = (target.y - pos_y) / 500.0;
 
         let inputs = [
             sensors[0], sensors[1], sensors[2], sensors[3], sensors[4],
-            dx, dy,
         ];
 
         let (fx, fy) = brain.predict(&inputs);

@@ -30,7 +30,7 @@ Render.run(render);
 
 const POPULATION_SIZE = 100;
 const TRIAL_FRAMES = 800;
-const DNA_LENGTH = 62;
+const DNA_LENGTH = 50;
 const MUTATION_RATE = 0.05;
 
 const COLS = 16;
@@ -284,7 +284,7 @@ function createBrain(dna = null) {
             let dnaIdx = 0;
             for (let h = 0; h < 6; h++) {
                 let sum = 0;
-                for (let i = 0; i < 7; i++) {
+                for (let i = 0; i < 5; i++) {
                     sum += inputs[i] * dna[dnaIdx++];
                 }
                 sum += dna[dnaIdx++];
@@ -423,11 +423,7 @@ function tick() {
             return res.fraction;
         });
 
-        let targetCp = checkpoints[currentAgentCheckpoints];
-        let dx = (targetCp.x - x) / 800;
-        let dy = (targetCp.y - y) / 500;
-
-        let inputs = [...sensors, dx, dy];
+        let inputs = [...sensors];
         let outputs = currentAgent.brain.predict(inputs);
 
         let forceX = outputs[0] * 0.002;
