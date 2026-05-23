@@ -561,7 +561,36 @@ fn extract_visualizer() {
     let _ = std::fs::write("visualizer/app.js", js);
 }
 
+fn update_if_available() {
+    println!("Checking for updates from GitHub...");
+    let status = self_update::backends::github::Update::configure()
+        .repo_owner("don12335")
+        .repo_name("Genesis")
+        .bin_name("genesis")
+        .target("windows") // Expects asset name: genesis-windows.exe
+        .no_archive(true)  // Expects a bare .exe instead of a .zip
+        .show_download_progress(true)
+        .current_version(env!("CARGO_PKG_VERSION"))
+        .build()
+        .and_then(|updater| updater.update());
+
+    match status {
+        Ok(self_update::Status::UpToDate(v)) => {
+            println!("You are running the latest version (v{}).", v);
+        }
+        Ok(self_update::Status::Updated(v)) => {
+            println!("\nSUCCESS: Genesis updated to version v{}!", v);
+            println!("Please close this window and restart the program.");
+            std::process::exit(0);
+        }
+        Err(e) => {
+            println!("Update check failed or skipped: {}", e);
+        }
+    }
+}
+
 fn main() {
+    update_if_available();
     extract_visualizer();
     loop {
         println!("\n=========================================");
