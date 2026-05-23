@@ -536,7 +536,8 @@ fn train_brain(generations: usize) {
     let base = std::env::current_exe()
         .ok()
         .and_then(|p| p.parent().map(|p| p.to_path_buf()))
-        .unwrap_or_else(|| std::env::current_dir().unwrap());
+        .unwrap_or_else(|| std::env::current_dir().unwrap())
+        .join("genesis_data");
 
     if let Ok(dna_json) = serde_json::to_string(&best_dna_ever) {
         let artifact_path = base.join("artifact.dna");
@@ -559,7 +560,8 @@ fn extract_visualizer() {
     let base = std::env::current_exe()
         .ok()
         .and_then(|p| p.parent().map(|p| p.to_path_buf()))
-        .unwrap_or_else(|| std::env::current_dir().unwrap());
+        .unwrap_or_else(|| std::env::current_dir().unwrap())
+        .join("genesis_data");
         
     let vis_dir = base.join("visualizer");
     let _ = std::fs::create_dir_all(&vis_dir);
@@ -662,7 +664,8 @@ fn main() {
                     let base = std::env::current_exe()
                         .ok()
                         .and_then(|p| p.parent().map(|p| p.to_path_buf()))
-                        .unwrap_or_else(|| std::env::current_dir().unwrap());
+                        .unwrap_or_else(|| std::env::current_dir().unwrap())
+                        .join("genesis_data");
                     let index_path = base.join("visualizer").join("index.html");
                     
                     if std::process::Command::new("cmd")
