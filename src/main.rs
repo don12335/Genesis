@@ -578,6 +578,7 @@ fn update_if_available() {
         .repo_owner("don12335")
         .repo_name("Genesis")
         .bin_name("genesis")
+        .target("genesis.exe")
         .show_download_progress(true)
         .current_version(env!("CARGO_PKG_VERSION"))
         .build()
