@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genesis | Maze Escape Evolution</title>
+    <meta name="description" content="Watch genetic agents evolve to solve a maze using genetic algorithms and natural selection.">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="brand">
+                <h1>GENESIS MAZE</h1>
+                <span class="subtitle">Genetic Algorithm Maze Solver</span>
+            </div>
+            <div class="controls">
+                <button id="btnFF" class="btn btn-secondary">Normal Speed</button>
+                <button id="btnStart" class="btn btn-primary">Start Evolution</button>
+            </div>
+        </header>
+
+        <div class="game-board">
+            <div class="sidebar">
+                <div class="card">
+                    <h2>Evolution Status</h2>
+                    <div class="stat-row">
+                        <span class="label">Generation:</span>
+                        <span class="value" id="valGen">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="label">Best Fitness:</span>
+                        <span class="value accent" id="valFitness">0.0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="label">Population:</span>
+                        <span class="value">100</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="label">Testing Agent:</span>
+                        <span class="value accent" id="valCurrent">0 / 100</span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>How it Works</h2>
+                    <p class="info-text">Each agent has a <strong>neural network brain</strong> and <strong>5 proximity sensors</strong> scanning for nearby walls.</p>
+                    <p class="info-text">The DNA consists of the brain's weights and biases. Agents that get closest to checkpoints and the exit survive and pass their brains to the next generation!</p>
+                </div>
+            </div>
+
+            <div class="main-area">
+                <div class="canvas-wrapper">
+                    <div id="physics-container"></div>
+                    <div class="canvas-label">Live Maze Evolution</div>
+                </div>
+
+                <div class="card">
+                    <h2>Best Agent's DNA (Gen <span id="dnaGen">0</span>)</h2>
+                    <div class="dna-panel" id="dnaBars">
+                        <!-- Visual representation of force vectors over time -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

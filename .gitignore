@@ -1,1 +1,29 @@
+# Rust / Cargo
+target/
+**/*.rs.bk
+# Cargo.lock is sometimes ignored for binaries if desired, but we'll leave it out for now to ensure reproducible builds, or ignore it if preferred.
+# Actually, for small toy binaries, ignoring Cargo.lock is fine, but usually we track it. I will ignore it just in case, but let's keep it safe.
+
+# Genesis Training Artifacts
+artifact.dna
+visualizer/dna.js
+
+# Old VM Artifacts (Obsolete)
+visualizer/history.json
+visualizer/program.json
+
+# OS / Editor Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Executables & Binaries
 *.exe
+*.pdb
+*.hex
+*.dll
+*.so
+*.dylib

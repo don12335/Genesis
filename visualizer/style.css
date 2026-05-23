@@ -1,0 +1,188 @@
+:root {
+    --bg: #f5f5f7;
+    --bg-panel: #ffffff;
+    --text: #1d1d1f;
+    --text-secondary: #6e6e73;
+    --border: #d2d2d7;
+    --accent: #0071e3;
+    --accent-hover: #0077ed;
+    --success: #34c759;
+    --warning: #ff9f0a;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'Fira Code', monospace;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    padding: 24px;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+header .subtitle {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.controls {
+    display: flex;
+    gap: 8px;
+}
+
+.btn {
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.15s ease;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+.btn-primary:hover { background: var(--accent-hover); }
+
+.btn-secondary {
+    background: #e8e8ed;
+    color: var(--text);
+}
+.btn-secondary:hover { background: #d2d2d7; }
+
+.btn-active {
+    background: var(--warning);
+    color: white;
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.card {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+}
+
+.card h2 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9375rem;
+    padding: 6px 0;
+}
+
+.stat-row .label {
+    color: var(--text-secondary);
+}
+
+.stat-row .value {
+    font-weight: 600;
+    font-family: var(--font-mono);
+}
+
+.stat-row .value.accent {
+    color: var(--accent);
+}
+
+.info-text {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.info-text + .info-text {
+    margin-top: 8px;
+}
+
+.main-area {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.canvas-wrapper {
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: var(--shadow-lg);
+}
+
+#physics-container canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.canvas-label {
+    position: absolute;
+    bottom: 8px;
+    left: 12px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    pointer-events: none;
+    opacity: 0.6;
+}
+
+.dna-panel {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 48px;
+    overflow: hidden;
+}
+
+.dna-bar {
+    flex: 1;
+    border-radius: 2px;
+    transition: height 0.15s ease;
+    min-height: 3px;
+}

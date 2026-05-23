@@ -1,52 +1,28 @@
-# Genesis Complete Edition
+# Genesis Neuroevolution Trainer
 
-![Rust](https://img.shields.io/badge/Language-Rust-orange.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
-![Build](https://img.shields.io/badge/Build-Passing-brightgreen.svg)
+Genesis is a neuroevolution platform designed to train AI agents to solve dynamically generated mazes. It combines a high-performance Rust CLI trainer with a visual, physics-based Web interface, making it easy for both developers and laypeople to understand how neural networks and genetic algorithms work.
 
-## Overview
-Genesis is a high-performance, fault-tolerant evolutionary computation engine. Built entirely in Rust, it leverages a custom Abstract Syntax Tree (AST) Virtual Machine and the `rayon` parallelization framework to synthesize executable machine logic through genetic algorithms.
+## Features
+- **High-Performance CLI Trainer**: A fast, Rust-based backend that simulates thousands of generations in seconds using parallel processing.
+- **Web Visualizer**: A 2D physics visualization built with `matter.js` that allows you to watch the trained brains (or untrained ones) navigate the maze in real-time.
+- **Sensor-Based AI**: Each agent is equipped with 5 "raycast" sensors (similar to LiDAR) to detect walls and navigate.
+- **Neuroevolution**: Agents evolve using natural selection—only the ones that get closest to the exit survive and pass their "DNA" (neural network weights) to the next generation.
 
-## Core Features
+## Getting Started
 
-### 1. Parallel Genotype Optimization
-The core engine (`EvolutionaryEngine`) evaluates thousands of distinct genotypes concurrently across all available CPU cores. It utilizes crossover recombination and AST-aware mutation to converge on optimal solutions in fractions of a second.
+### 1. Training an Agent (CLI Tool)
+The Genesis CLI tool is the fastest way to train a smart agent.
+1. Run the `genesis` executable (or build the Rust project via `cargo run --release`).
+2. Select **Train Neural Network** from the menu.
+3. Choose your training intensity (e.g., 500 generations).
+4. The CLI will quickly evolve the agents and save the best brain to `visualizer/dna.js`.
 
-### 2. Logic Synthesis
-Genesis can automatically synthesize complex logic functions (e.g., XOR gates, arithmetic operations) from a randomized instruction pool without human intervention.
-```bash
-cargo run --release -- evolve --target logic
-```
+### 2. Watching the Evolution (Web Visualizer)
+You can view the pre-trained agent or watch the evolution happen live in your browser:
+1. Open the CLI and select **Open Web Visualizer**, or manually open `visualizer/index.html` in your web browser.
+2. If you've trained an agent in the CLI, the web visualizer will automatically load its brain.
+3. Click **Start Evolution** to watch the simulation!
 
-### 3. Aerospace Fault-Tolerance Simulation
-Designed for mission-critical applications, the engine can simulate severe hardware degradation (e.g., cosmic radiation bit-flips in registers and memory). Programs evolved under these constraints automatically develop resilience and temporal dodging strategies to guarantee successful execution.
-```bash
-cargo run --release -- evolve --target fault_tolerance
-```
-
-### 4. Turing-Complete Evolution (Fibonacci Sequence)
-The engine is capable of evolving algorithms that require true Turing-completeness, including memory initialization, variable swapping, and infinite loops (`Jmp`). The `fibonacci` target forces the AI to synthesize a program that continually calculates and outputs the Fibonacci sequence (`1, 1, 2, 3, 5, 8, 13...`).
-```bash
-cargo run --release -- evolve --target fibonacci --generations 500000
-```
-
-### 5. Native Rust Transpiler
-The engine features a built-in transpiler that converts the evolved AST bytecode (Hex format) directly into standard Rust source code. This allows the synthesized logic to be compiled and executed natively without virtual machine overhead.
-```bash
-cargo run --release -- transpile --input program.hex --output output.rs
-```
-
-## System Requirements
-- Rust Toolchain (`cargo`) 1.70+
-- Multi-core CPU recommended for parallel evaluation
-
-## Build Instructions
-```bash
-cargo build --release
-```
-
----
-
-## Contributors & Acknowledgments
-* **don** - Creator & Lead Developer
-* **Google Gemini** - AI Pair Programmer (Assisted in Rust architecture design and evolutionary engine optimization)
+## Project Structure
+- `src/`: The Rust backend and CLI tool for fast evolutionary training.
+- `visualizer/`: The HTML/JS frontend that visualizes the agents and the maze.
