@@ -19,6 +19,8 @@
                 <span class="subtitle">Genetic Algorithm Maze Solver</span>
             </div>
             <div class="controls">
+                <input type="file" id="dnaUpload" accept=".js,.dna" style="display: none;">
+                <label for="dnaUpload" class="btn btn-secondary" style="cursor: pointer;">Load DNA</label>
                 <button id="btnFF" class="btn btn-secondary">Normal Speed</button>
                 <button id="btnStart" class="btn btn-primary">Start Evolution</button>
             </div>
@@ -68,6 +70,7 @@
         </div>
     </div>
 
+    <script src="dna.js"></script>
     <script src="app.js"></script>
 </body>
 

@@ -533,14 +533,22 @@ fn train_brain(generations: usize) {
     println!("\n\nTraining finished successfully!");
     println!("Saving best brain weights...");
 
+    let base = std::env::current_exe()
+        .ok()
+        .and_then(|p| p.parent().map(|p| p.to_path_buf()))
+        .unwrap_or_else(|| std::env::current_dir().unwrap());
+
     if let Ok(dna_json) = serde_json::to_string(&best_dna_ever) {
-        if std::fs::write("artifact.dna", &dna_json).is_ok() {
-            println!("- Saved raw weights to 'artifact.dna'");
+        let artifact_path = base.join("artifact.dna");
+        if std::fs::write(&artifact_path, &dna_json).is_ok() {
+            println!("- Saved raw weights to '{}'", artifact_path.display());
         }
         let js_content = format!("window.importedDNA = {};", dna_json);
-        if std::fs::create_dir_all("visualizer").is_ok() {
-            if std::fs::write("visualizer/dna.js", js_content).is_ok() {
-                println!("- Saved brain script to 'visualizer/dna.js'");
+        let vis_dir = base.join("visualizer");
+        if std::fs::create_dir_all(&vis_dir).is_ok() {
+            let dna_js_path = vis_dir.join("dna.js");
+            if std::fs::write(&dna_js_path, js_content).is_ok() {
+                println!("- Saved brain script to '{}'", dna_js_path.display());
             }
         }
     }
@@ -548,14 +556,20 @@ fn train_brain(generations: usize) {
 }
 
 fn extract_visualizer() {
-    let _ = std::fs::create_dir_all("visualizer");
+    let base = std::env::current_exe()
+        .ok()
+        .and_then(|p| p.parent().map(|p| p.to_path_buf()))
+        .unwrap_or_else(|| std::env::current_dir().unwrap());
+        
+    let vis_dir = base.join("visualizer");
+    let _ = std::fs::create_dir_all(&vis_dir);
     let html = include_str!("../visualizer/index.html");
     let css = include_str!("../visualizer/style.css");
     let js = include_str!("../visualizer/app.js");
 
-    let _ = std::fs::write("visualizer/index.html", html);
-    let _ = std::fs::write("visualizer/style.css", css);
-    let _ = std::fs::write("visualizer/app.js", js);
+    let _ = std::fs::write(vis_dir.join("index.html"), html);
+    let _ = std::fs::write(vis_dir.join("style.css"), css);
+    let _ = std::fs::write(vis_dir.join("app.js"), js);
 }
 
 fn update_if_available() {
@@ -644,8 +658,14 @@ fn main() {
                 println!("\nOpening web visualizer in browser...");
                 #[cfg(target_os = "windows")]
                 {
+                    let base = std::env::current_exe()
+                        .ok()
+                        .and_then(|p| p.parent().map(|p| p.to_path_buf()))
+                        .unwrap_or_else(|| std::env::current_dir().unwrap());
+                    let index_path = base.join("visualizer").join("index.html");
+                    
                     if std::process::Command::new("cmd")
-                        .args(&["/C", "start", "", "visualizer\\index.html"])
+                        .args(&["/C", "start", "", index_path.to_str().unwrap()])
                         .spawn()
                         .is_ok()
                     {

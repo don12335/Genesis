@@ -358,7 +358,13 @@ let currentAgentCheckpoints = 0;
 
 function startGeneration() {
     if (allDNA.length === 0) {
-        for (let i = 0; i < POPULATION_SIZE; i++) allDNA.push(randomDNA());
+        if (window.importedDNA && Array.isArray(window.importedDNA) && window.importedDNA.length === DNA_LENGTH) {
+            console.log("Loaded pre-trained DNA from dna.js");
+            allDNA.push([...window.importedDNA]);
+            for (let i = 1; i < POPULATION_SIZE; i++) allDNA.push(mutateDNA([...window.importedDNA]));
+        } else {
+            for (let i = 0; i < POPULATION_SIZE; i++) allDNA.push(randomDNA());
+        }
     }
     fitnesses = new Array(POPULATION_SIZE).fill(0);
     currentIndex = 0;
@@ -602,4 +608,31 @@ Events.on(render, 'afterRender', () => {
         }
     });
     ctx.restore();
+});
+
+document.getElementById('dnaUpload').addEventListener('change', function(e) {
+    let file = e.target.files[0];
+    if (!file) return;
+
+    let reader = new FileReader();
+    reader.onload = function(event) {
+        let text = event.target.result;
+        try {
+            if (text.startsWith("window.importedDNA = ")) {
+                text = text.replace("window.importedDNA = ", "");
+                if (text.endsWith(";")) text = text.slice(0, -1);
+            }
+            let parsed = JSON.parse(text);
+            if (Array.isArray(parsed) && parsed.length === DNA_LENGTH) {
+                window.importedDNA = parsed;
+                alert("DNA successfully loaded! Click 'Start Evolution' to run it.");
+                document.querySelector('label[for="dnaUpload"]').innerText = "DNA Loaded!";
+            } else {
+                alert("Invalid DNA format or wrong length (expected " + DNA_LENGTH + " weights).");
+            }
+        } catch (err) {
+            alert("Error parsing DNA file. Please ensure it's a valid JSON or dna.js file.");
+        }
+    };
+    reader.readAsText(file);
 });
