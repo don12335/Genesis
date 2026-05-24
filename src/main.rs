@@ -11,9 +11,9 @@ const WALL_THICKNESS: f64 = 6.0;
 const W: f64 = 800.0;
 const H: f64 = 500.0;
 
-const POPULATION_SIZE: usize = 100;
-const TRIAL_FRAMES: usize = 800;
-const DNA_LENGTH: usize = 50;
+const POPULATION_SIZE: usize = 500;
+const TRIAL_FRAMES: usize = 1500;
+const DNA_LENGTH: usize = 104;
 const MUTATION_RATE: f64 = 0.05;
 
 #[derive(Clone, Debug)]
@@ -305,33 +305,41 @@ fn cast_ray(x1: f64, y1: f64, angle: f64, max_dist: f64, walls: &[Wall]) -> f64 
             }
         }
     }
-    closest_t
+    1.0 - closest_t
 }
 
 struct Brain {
     dna: Vec<f64>,
+    hidden_state: [f64; 6],
 }
 
 impl Brain {
-    fn predict(&self, inputs: &[f64]) -> (f64, f64) {
-        let mut hidden = Vec::with_capacity(6);
+    fn predict(&mut self, inputs: &[f64]) -> (f64, f64) {
+        let mut new_hidden = [0.0; 6];
         let mut dna_idx = 0;
-        for _ in 0..6 {
+        
+        for h in 0..6 {
             let mut sum = 0.0;
-            for i in 0..5 {
+            for i in 0..8 {
                 sum += inputs[i] * self.dna[dna_idx];
+                dna_idx += 1;
+            }
+            for i in 0..6 {
+                sum += self.hidden_state[i] * self.dna[dna_idx];
                 dna_idx += 1;
             }
             sum += self.dna[dna_idx];
             dna_idx += 1;
-            hidden.push(sum.tanh());
+            new_hidden[h] = sum.tanh();
         }
+        
+        self.hidden_state = new_hidden;
 
         let mut outputs = Vec::with_capacity(2);
         for _ in 0..2 {
             let mut sum = 0.0;
             for h in 0..6 {
-                sum += hidden[h] * self.dna[dna_idx];
+                sum += self.hidden_state[h] * self.dna[dna_idx];
                 dna_idx += 1;
             }
             sum += self.dna[dna_idx];
@@ -343,7 +351,7 @@ impl Brain {
 }
 
 fn evaluate_agent(dna: &[f64], checkpoints: &[Point], walls: &[Wall]) -> f64 {
-    let brain = Brain { dna: dna.to_vec() };
+    let mut brain = Brain { dna: dna.to_vec(), hidden_state: [0.0; 6] };
     let mut pos_x = CELL_W / 2.0;
     let mut pos_y = CELL_H / 2.0;
     let mut vel_x = 0.0;
@@ -353,6 +361,8 @@ fn evaluate_agent(dna: &[f64], checkpoints: &[Point], walls: &[Wall]) -> f64 {
     let mut frames = 0;
 
     let radius = 8.0;
+    let mut visited_cells = std::collections::HashSet::new();
+    visited_cells.insert((0usize, 0usize));
 
     while frames < TRIAL_FRAMES {
         frames += 1;
@@ -363,23 +373,37 @@ fn evaluate_agent(dna: &[f64], checkpoints: &[Point], walls: &[Wall]) -> f64 {
             heading,
             heading + std::f64::consts::FRAC_PI_4,
             heading + std::f64::consts::FRAC_PI_2,
+            heading + 3.0 * std::f64::consts::FRAC_PI_4,
+            heading + std::f64::consts::PI,
+            heading - 3.0 * std::f64::consts::FRAC_PI_4,
         ];
 
-        let mut sensors = [0.0; 5];
-        for i in 0..5 {
+        let mut sensors = [0.0; 8];
+        for i in 0..8 {
             sensors[i] = cast_ray(pos_x, pos_y, angles[i], 150.0, walls);
         }
 
-        let target = checkpoints[checkpoint_idx];
-
         let inputs = [
             sensors[0], sensors[1], sensors[2], sensors[3], sensors[4],
+            sensors[5], sensors[6], sensors[7],
         ];
 
-        let (fx, fy) = brain.predict(&inputs);
+        let (out0, out1) = brain.predict(&inputs);
+        
+        let thrust = out0 * 0.2;
+        let steering = out1 * 0.1; // radians per frame
+        
+        heading += steering;
 
-        vel_x = vel_x * 0.92 + fx * 0.002;
-        vel_y = vel_y * 0.92 + fy * 0.002;
+        vel_x = vel_x * 0.92 + thrust * heading.cos();
+        vel_y = vel_y * 0.92 + thrust * heading.sin();
+        
+        let speed_sq = vel_x * vel_x + vel_y * vel_y;
+        if speed_sq > 9.0 {
+            let speed = speed_sq.sqrt();
+            vel_x = (vel_x / speed) * 3.0;
+            vel_y = (vel_y / speed) * 3.0;
+        }
 
         pos_x += vel_x;
         pos_y += vel_y;
@@ -387,35 +411,56 @@ fn evaluate_agent(dna: &[f64], checkpoints: &[Point], walls: &[Wall]) -> f64 {
         pos_x = pos_x.clamp(radius, W - radius);
         pos_y = pos_y.clamp(radius, H - radius);
 
-        for wall in walls {
-            let cx = pos_x.clamp(wall.min_x, wall.max_x);
-            let cy = pos_y.clamp(wall.min_y, wall.max_y);
-            let w_dx = pos_x - cx;
-            let w_dy = pos_y - cy;
-            let dist = (w_dx * w_dx + w_dy * w_dy).sqrt();
-            if dist < radius {
-                let overlap = radius - dist;
-                if dist > 0.0 {
-                    pos_x += (w_dx / dist) * overlap;
-                    pos_y += (w_dy / dist) * overlap;
-                    let nx = w_dx / dist;
-                    let ny = w_dy / dist;
-                    let dot = vel_x * nx + vel_y * ny;
-                    if dot < 0.0 {
-                        vel_x -= dot * nx;
-                        vel_y -= dot * ny;
+        for _ in 0..2 { // Run collision twice to resolve corners
+            for wall in walls {
+                let cx = pos_x.clamp(wall.min_x, wall.max_x);
+                let cy = pos_y.clamp(wall.min_y, wall.max_y);
+                let w_dx = pos_x - cx;
+                let w_dy = pos_y - cy;
+                let dist = (w_dx * w_dx + w_dy * w_dy).sqrt();
+                if dist < radius {
+                    if dist > 0.0 {
+                        let overlap = radius - dist;
+                        pos_x += (w_dx / dist) * overlap;
+                        pos_y += (w_dy / dist) * overlap;
+                        let nx = w_dx / dist;
+                        let ny = w_dy / dist;
+                        let dot = vel_x * nx + vel_y * ny;
+                        if dot < 0.0 {
+                            vel_x -= dot * nx;
+                            vel_y -= dot * ny;
+                        }
+                    } else {
+                        // Center is exactly inside the AABB (tunneling). Push to nearest edge.
+                        let dl = pos_x - wall.min_x;
+                        let dr = wall.max_x - pos_x;
+                        let dt = pos_y - wall.min_y;
+                        let db = wall.max_y - pos_y;
+                        
+                        let min_d = dl.min(dr).min(dt).min(db);
+                        if min_d == dl {
+                            pos_x = wall.min_x - radius - 0.1;
+                            vel_x = vel_x.min(0.0);
+                        } else if min_d == dr {
+                            pos_x = wall.max_x + radius + 0.1;
+                            vel_x = vel_x.max(0.0);
+                        } else if min_d == dt {
+                            pos_y = wall.min_y - radius - 0.1;
+                            vel_y = vel_y.min(0.0);
+                        } else {
+                            pos_y = wall.max_y + radius + 0.1;
+                            vel_y = vel_y.max(0.0);
+                        }
                     }
-                } else {
-                    pos_y -= radius;
-                    vel_y = 0.0;
                 }
             }
         }
 
-        if vel_x * vel_x + vel_y * vel_y > 0.01 {
-            heading = vel_y.atan2(vel_x);
-        }
+        let cell_c = (pos_x / CELL_W) as usize;
+        let cell_r = (pos_y / CELL_H) as usize;
+        visited_cells.insert((cell_r.min(ROWS - 1), cell_c.min(COLS - 1)));
 
+        let target = checkpoints[checkpoint_idx];
         let dist_target = ((target.x - pos_x).powi(2) + (target.y - pos_y).powi(2)).sqrt();
         if dist_target < 25.0 {
             checkpoint_idx += 1;
@@ -425,14 +470,15 @@ fn evaluate_agent(dna: &[f64], checkpoints: &[Point], walls: &[Wall]) -> f64 {
         }
     }
 
-    let mut fit = checkpoint_idx as f64 * 3000.0;
+    let exploration_bonus = visited_cells.len() as f64 * 100.0;
+    let mut fit = exploration_bonus + checkpoint_idx as f64 * 5000.0;
     if checkpoint_idx < checkpoints.len() {
         let target = checkpoints[checkpoint_idx];
         let dist_target = ((target.x - pos_x).powi(2) + (target.y - pos_y).powi(2)).sqrt();
         fit += (1500.0 - dist_target).max(0.0);
     }
     if checkpoint_idx >= checkpoints.len() {
-        fit += 20000.0 + (TRIAL_FRAMES - frames) as f64 * 20.0;
+        fit += 30000.0 + (TRIAL_FRAMES - frames) as f64 * 20.0;
     }
     fit
 }

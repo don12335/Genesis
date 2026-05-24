@@ -10,7 +10,7 @@ const container = document.getElementById('physics-container');
 const W = 800;
 const H = 500;
 
-const engine = Engine.create({ 
+const engine = Engine.create({
     gravity: { x: 0, y: 0 },
     positionIterations: 10,
     velocityIterations: 10
@@ -28,9 +28,9 @@ const render = Render.create({
 });
 Render.run(render);
 
-const POPULATION_SIZE = 100;
-const TRIAL_FRAMES = 800;
-const DNA_LENGTH = 50;
+const POPULATION_SIZE = 500;
+const TRIAL_FRAMES = 1500;
+const DNA_LENGTH = 104;
 const MUTATION_RATE = 0.05;
 
 const COLS = 16;
@@ -279,22 +279,29 @@ function createBrain(dna = null) {
     }
     return {
         dna: dna,
+        hiddenState: [0, 0, 0, 0, 0, 0],
         predict(inputs) {
-            let hidden = [];
+            let newHidden = [0, 0, 0, 0, 0, 0];
             let dnaIdx = 0;
             for (let h = 0; h < 6; h++) {
                 let sum = 0;
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 8; i++) {
                     sum += inputs[i] * dna[dnaIdx++];
                 }
+                for (let i = 0; i < 6; i++) {
+                    sum += this.hiddenState[i] * dna[dnaIdx++];
+                }
                 sum += dna[dnaIdx++];
-                hidden.push(Math.tanh(sum));
+                newHidden[h] = Math.tanh(sum);
             }
+            
+            this.hiddenState = newHidden;
+            
             let outputs = [];
             for (let o = 0; o < 2; o++) {
                 let sum = 0;
                 for (let h = 0; h < 6; h++) {
-                    sum += hidden[h] * dna[dnaIdx++];
+                    sum += this.hiddenState[h] * dna[dnaIdx++];
                 }
                 sum += dna[dnaIdx++];
                 outputs.push(Math.tanh(sum));
@@ -404,9 +411,6 @@ function tick() {
         frameCount++;
 
         let vel = currentAgent.velocity;
-        if (vel.x * vel.x + vel.y * vel.y > 0.01) {
-            currentAgent.heading = Math.atan2(vel.y, vel.x);
-        }
         let heading = currentAgent.heading || 0;
 
         let angles = [
@@ -414,7 +418,10 @@ function tick() {
             heading - Math.PI / 4,
             heading,
             heading + Math.PI / 4,
-            heading + Math.PI / 2
+            heading + Math.PI / 2,
+            heading + 3 * Math.PI / 4,
+            heading + Math.PI,
+            heading - 3 * Math.PI / 4
         ];
 
         let wallsList = Composite.allBodies(engine.world).filter(b => b.isWall);
@@ -426,15 +433,26 @@ function tick() {
 
         let sensors = angles.map(angle => {
             let res = castRay(x, y, angle, 150, nearbyWalls);
-            return res.fraction;
+            return 1.0 - res.fraction;
         });
 
         let inputs = [...sensors];
         let outputs = currentAgent.brain.predict(inputs);
 
-        let forceX = outputs[0] * 0.002;
-        let forceY = outputs[1] * 0.002;
+        let thrust = outputs[0] * 0.003;
+        let steering = outputs[1] * 0.1;
+        
+        currentAgent.heading = (currentAgent.heading || 0) + steering;
+        
+        let forceX = thrust * Math.cos(currentAgent.heading);
+        let forceY = thrust * Math.sin(currentAgent.heading);
+        
         Body.applyForce(currentAgent, currentAgent.position, { x: forceX, y: forceY });
+        
+        let speed = Vector.magnitude(currentAgent.velocity);
+        if (speed > 3.0) {
+            Body.setVelocity(currentAgent, Vector.mult(Vector.normalise(currentAgent.velocity), 3.0));
+        }
 
         if (currentAgentCheckpoints < checkpoints.length) {
             let targetCp = checkpoints[currentAgentCheckpoints];
@@ -531,7 +549,7 @@ let isLoopRunning = false;
 btnFF.addEventListener('click', () => {
     isFastForward = !isFastForward;
     if (isFastForward) {
-        btnFF.textContent = '⏩ Fast Forward (30x)';
+        btnFF.textContent = 'Fast Forward (30x)';
         btnFF.classList.remove('btn-secondary');
         btnFF.classList.add('btn-active');
     } else {
@@ -573,7 +591,10 @@ Events.on(render, 'afterRender', () => {
         heading - Math.PI / 4,
         heading,
         heading + Math.PI / 4,
-        heading + Math.PI / 2
+        heading + Math.PI / 2,
+        heading + 3 * Math.PI / 4,
+        heading + Math.PI,
+        heading - 3 * Math.PI / 4
     ];
 
     let wallsList = Composite.allBodies(engine.world).filter(b => b.isWall);
@@ -610,12 +631,12 @@ Events.on(render, 'afterRender', () => {
     ctx.restore();
 });
 
-document.getElementById('dnaUpload').addEventListener('change', function(e) {
+document.getElementById('dnaUpload').addEventListener('change', function (e) {
     let file = e.target.files[0];
     if (!file) return;
 
     let reader = new FileReader();
-    reader.onload = function(event) {
+    reader.onload = function (event) {
         let text = event.target.result;
         try {
             if (text.startsWith("window.importedDNA = ")) {
